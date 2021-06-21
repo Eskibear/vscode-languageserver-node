@@ -4,13 +4,14 @@
  * ------------------------------------------------------------------------------------------ */
 
 import {
-	languages as Languages, Disposable, TextDocument, ProviderResult, Position as VPosition,
-	CancellationToken, TypeHierarchyProvider as VTypeHierarchyProvider, TypeHierarchyItem as VTypeHierarchyItem,
+	Disposable, TextDocument, ProviderResult, Position as VPosition, CancellationToken
 } from 'vscode';
 
 import { ClientCapabilities, DocumentSelector, ServerCapabilities, TypeHierarchyClientCapabilities, TypeHierarchyOptions, TypeHierarchyPrepareRequest, TypeHierarchyRegistrationOptions, TypeHierarchySubtypesParams, TypeHierarchySubtypesRequest, TypeHierarchySupertypesParams, TypeHierarchySupertypesRequest } from 'vscode-languageserver-protocol';
 
 import { TextDocumentFeature, BaseLanguageClient, Middleware } from './client';
+import { registerTypeHierarchyProvider } from './typeHierarchy.impl';
+import { TypeHierarchyProvider as VTypeHierarchyProvider, TypeHierarchyItem as VTypeHierarchyItem } from "./typeHierarchy.api"
 
 function ensure<T, K extends keyof T>(target: T, key: K): T[K] {
 	if (target[key] === void 0) {
@@ -20,7 +21,7 @@ function ensure<T, K extends keyof T>(target: T, key: K): T[K] {
 }
 
 export interface PrepareTypeHierarchySignature {
-	(this: void, document: TextDocument, position: VPosition, token: CancellationToken): ProviderResult<VTypeHierarchyItem | VTypeHierarchyItem[]>;
+	(this: void, document: TextDocument, position: VPosition, token: CancellationToken): ProviderResult<VTypeHierarchyItem[]>;
 }
 
 export interface TypeHierarchySupertypesSignature {
@@ -37,7 +38,7 @@ export interface TypeHierarchySubtypesSignature {
  * @since 3.17.0
  */
 export interface TypeHierarchyMiddleware {
-	prepareTypeHierarchy?: (this: void, document: TextDocument, positions: VPosition, token: CancellationToken, next: PrepareTypeHierarchySignature) => ProviderResult<VTypeHierarchyItem | VTypeHierarchyItem[]>;
+	prepareTypeHierarchy?: (this: void, document: TextDocument, positions: VPosition, token: CancellationToken, next: PrepareTypeHierarchySignature) => ProviderResult<VTypeHierarchyItem[]>;
 	provideTypeHierarchySupertypes?: (this: void, item: VTypeHierarchyItem, token: CancellationToken, next: TypeHierarchySupertypesSignature) => ProviderResult<VTypeHierarchyItem[]>;
 	provideTypeHierarchySubtypes?: (this: void, item: VTypeHierarchyItem, token: CancellationToken, next: TypeHierarchySubtypesSignature) => ProviderResult<VTypeHierarchyItem[]>;
 }
@@ -50,7 +51,7 @@ class TypeHierarchyProvider implements VTypeHierarchyProvider {
 		this.middleware = client.clientOptions.middleware!;
 	}
 
-	public prepareTypeHierarchy(document: TextDocument, position: VPosition, token: CancellationToken): ProviderResult<VTypeHierarchyItem | VTypeHierarchyItem[]> {
+	public prepareTypeHierarchy(document: TextDocument, position: VPosition, token: CancellationToken): ProviderResult<VTypeHierarchyItem[]> {
 		const client = this.client;
 		const middleware = this.middleware;
 		const prepareTypeHierarchy: PrepareTypeHierarchySignature = (document, position, token) => {
@@ -134,6 +135,6 @@ export class TypeHierarchyFeature extends TextDocumentFeature<boolean | TypeHier
 	protected registerLanguageProvider(options: TypeHierarchyRegistrationOptions): [Disposable, TypeHierarchyProvider] {
 		const client = this._client;
 		const provider = new TypeHierarchyProvider(client);
-		return [Languages.registerTypeHierarchyProvider(options.documentSelector!, provider), provider];
+		return [registerTypeHierarchyProvider(options.documentSelector!, provider), provider];
 	}
 }

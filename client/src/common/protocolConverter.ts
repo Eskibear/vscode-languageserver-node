@@ -15,6 +15,7 @@ import ProtocolCodeAction from './protocolCodeAction';
 import { ProtocolDiagnostic, DiagnosticCode } from './protocolDiagnostic';
 import ProtocolCallHierarchyItem from './protocolCallHierarchyItem';
 import { AnnotatedTextEdit, ChangeAnnotation, CompletionItemLabelDetails, InsertTextMode } from 'vscode-languageserver-protocol';
+import { TypeHierarchyItem } from './typeHierarchy.api';
 
 interface InsertReplaceRange {
 	inserting: code.Range;
@@ -227,14 +228,14 @@ export interface Converter {
 	asLinkedEditingRanges(value: ls.LinkedEditingRanges | null | undefined): code.LinkedEditingRanges | undefined;
 
 	asTypeHierarchyItem(item: null): undefined;
-	asTypeHierarchyItem(item: ls.TypeHierarchyItem): code.TypeHierarchyItem;
-	asTypeHierarchyItem(item: ls.TypeHierarchyItem | null): code.TypeHierarchyItem | undefined;
-	asTypeHierarchyItem(item: ls.TypeHierarchyItem | null): code.TypeHierarchyItem | undefined;
+	asTypeHierarchyItem(item: ls.TypeHierarchyItem): TypeHierarchyItem;
+	asTypeHierarchyItem(item: ls.TypeHierarchyItem | null): TypeHierarchyItem | undefined;
+	asTypeHierarchyItem(item: ls.TypeHierarchyItem | null): TypeHierarchyItem | undefined;
 
 	asTypeHierarchyItems(items: null): undefined;
-	asTypeHierarchyItems(items: ls.TypeHierarchyItem[]): code.TypeHierarchyItem[];
-	asTypeHierarchyItems(items: ls.TypeHierarchyItem[] | null): code.TypeHierarchyItem[] | undefined;
-	asTypeHierarchyItems(items: ls.TypeHierarchyItem[] | null): code.TypeHierarchyItem[] | undefined;
+	asTypeHierarchyItems(items: ls.TypeHierarchyItem[]): TypeHierarchyItem[];
+	asTypeHierarchyItems(items: ls.TypeHierarchyItem[] | null): TypeHierarchyItem[] | undefined;
+	asTypeHierarchyItems(items: ls.TypeHierarchyItem[] | null): TypeHierarchyItem[] | undefined;
 }
 
 export interface URIConverter {
@@ -1212,29 +1213,29 @@ export function createConverter(uriConverter: URIConverter | undefined, trustMar
 
 	//------ Type Hierarchy
 	function asTypeHierarchyItem(item: null): undefined;
-	function asTypeHierarchyItem(item: ls.TypeHierarchyItem): code.TypeHierarchyItem;
-	function asTypeHierarchyItem(item: ls.TypeHierarchyItem | null): code.TypeHierarchyItem | undefined;
-	function asTypeHierarchyItem(item: ls.TypeHierarchyItem | null): code.TypeHierarchyItem | undefined {
+	function asTypeHierarchyItem(item: ls.TypeHierarchyItem): TypeHierarchyItem;
+	function asTypeHierarchyItem(item: ls.TypeHierarchyItem | null): TypeHierarchyItem | undefined;
+	function asTypeHierarchyItem(item: ls.TypeHierarchyItem | null): TypeHierarchyItem | undefined {
 		if (item === null) {
 			return undefined;
 		}
-		const result: code.TypeHierarchyItem = {
-			kind: asSymbolKind(item.kind),
-			name: item.name,
-			detail: item.detail || '',
-			uri: asUri(item.uri),
-			range: asRange(item.range),
-			selectionRange: asRange(item.selectionRange),
-			tags: asSymbolTags(item.tags),
-			data: item.data
-		};
+		const result: TypeHierarchyItem = new TypeHierarchyItem(
+			asSymbolKind(item.kind),
+			item.name,
+			item.detail || '',
+			asUri(item.uri),
+			asRange(item.range),
+			asRange(item.selectionRange)
+		);
+		result.tags = asSymbolTags(item.tags);
+		result.data = item.data;
 		return result;
 	}
 
 	function asTypeHierarchyItems(items: null): undefined;
-	function asTypeHierarchyItems(items: ls.TypeHierarchyItem[]): code.TypeHierarchyItem[];
-	function asTypeHierarchyItems(items: ls.TypeHierarchyItem[] | null): code.TypeHierarchyItem[] | undefined;
-	function asTypeHierarchyItems(items: ls.TypeHierarchyItem[] | null): code.TypeHierarchyItem[] | undefined {
+	function asTypeHierarchyItems(items: ls.TypeHierarchyItem[]): TypeHierarchyItem[];
+	function asTypeHierarchyItems(items: ls.TypeHierarchyItem[] | null): TypeHierarchyItem[] | undefined;
+	function asTypeHierarchyItems(items: ls.TypeHierarchyItem[] | null): TypeHierarchyItem[] | undefined {
 		if (items === null) {
 			return undefined;
 		}

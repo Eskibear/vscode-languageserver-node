@@ -20,7 +20,7 @@ import {
 	DocumentRangeFormattingEditProvider, OnTypeFormattingEditProvider, RenameProvider, DocumentLinkProvider, DocumentColorProvider, DeclarationProvider,
 	FoldingRangeProvider, ImplementationProvider, SelectionRangeProvider, TypeDefinitionProvider, WorkspaceSymbolProvider, CallHierarchyProvider,
 	DocumentSymbolProviderMetadata, EventEmitter, env as Env, TextDocumentShowOptions, FileWillCreateEvent, FileWillRenameEvent, FileWillDeleteEvent, FileCreateEvent, FileDeleteEvent, FileRenameEvent,
-	LinkedEditingRangeProvider, Event as VEvent, CancellationError, TypeHierarchyProvider
+	LinkedEditingRangeProvider, Event as VEvent, CancellationError
 } from 'vscode';
 
 import {
@@ -78,6 +78,8 @@ import * as Is from './utils/is';
 import { Delayer } from './utils/async';
 import * as UUID from './utils/uuid';
 import { ProgressPart } from './progressPart';
+
+import { TypeHierarchyProvider } from './typeHierarchy.api';
 
 interface Connection {
 

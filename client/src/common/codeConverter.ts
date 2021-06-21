@@ -16,6 +16,7 @@ import { ProtocolDiagnostic, DiagnosticCode } from './protocolDiagnostic';
 import ProtocolCallHierarchyItem from './protocolCallHierarchyItem';
 import { InsertTextMode, uinteger } from 'vscode-languageserver-protocol';
 import { CreateFilesParams, DeleteFilesParams, RenameFilesParams } from 'vscode-languageserver-protocol/lib/common/protocol.fileOperations';
+import { TypeHierarchyItem } from './typeHierarchy.api';
 
 interface InsertReplaceRange {
 	inserting: code.Range;
@@ -122,7 +123,7 @@ export interface Converter {
 
 	asCallHierarchyItem(value: code.CallHierarchyItem): proto.CallHierarchyItem;
 
-	asTypeHierarchyItem(value: code.TypeHierarchyItem): proto.TypeHierarchyItem;
+	asTypeHierarchyItem(value: TypeHierarchyItem): proto.TypeHierarchyItem;
 }
 
 export interface URIConverter {
@@ -801,7 +802,7 @@ export function createConverter(uriConverter?: URIConverter): Converter {
 		return result;
 	}
 
-	function asTypeHierarchyItem(value: code.TypeHierarchyItem): proto.TypeHierarchyItem {
+	function asTypeHierarchyItem(value: TypeHierarchyItem): proto.TypeHierarchyItem {
 		const result: proto.TypeHierarchyItem = {
 			name: value.name,
 			kind: asSymbolKind(value.kind),
