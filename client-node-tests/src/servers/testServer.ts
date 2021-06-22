@@ -16,6 +16,7 @@ import {
 
 import { URI } from 'vscode-uri';
 import { $DiagnosticClientCapabilities } from 'vscode-languageserver-protocol/src/common/proposed.diagnostic';
+import { TypeHierarchyItem } from 'vscode-languageserver-types';
 
 let connection: ProposedFeatures.Connection = createConnection(ProposedFeatures.all);
 
@@ -49,7 +50,7 @@ connection.onInitialize((params: InitializeParams): any => {
 	assert.equal(params.capabilities.workspace!.fileOperations!.willCreate, true);
 
 	const diagnosticClientCapabilities = (params.capabilities as $DiagnosticClientCapabilities).textDocument!.diagnostic;
-	fs.writeFileSync('/tmp/testrun/log.txt', JSON.stringify(diagnosticClientCapabilities, undefined, 4));
+	fs.writeFileSync('C:\\Users\\admin\\AppData\\Local\\Temp\\testrun\\log.txt', JSON.stringify(diagnosticClientCapabilities, undefined, 4));
 	assert.equal(diagnosticClientCapabilities?.dynamicRegistration, true);
 	assert.equal(diagnosticClientCapabilities?.relatedDocumentSupport, false);
 
@@ -99,7 +100,7 @@ connection.onInitialize((params: InitializeParams): any => {
 			fileOperations: {
 				// Static reg is folders + .txt files with operation kind in the path
 				didCreate: {
-					filters: [{ scheme: 'file', pattern: { glob: '**/created-static/**{/,/*.txt}' }}]
+					filters: [{ scheme: 'file', pattern: { glob: '**/created-static/**{/,/*.txt}' } }]
 				},
 				didRename: {
 					filters: [
@@ -129,7 +130,8 @@ connection.onInitialize((params: InitializeParams): any => {
 			identifier: 'da348dc5-c30a-4515-9d98-31ff3be38d14',
 			interFileDependencies: true,
 			workspaceDiagnostics: true
-		}
+		},
+		typeHierarchyProvider: true
 	};
 	return { capabilities, customResults: { hello: 'world' } };
 });
@@ -146,7 +148,7 @@ connection.onInitialized(() => {
 		]
 	});
 	void connection.client.register(DidDeleteFilesNotification.type, {
-		filters: [ { scheme: 'file', pattern: { glob: '**/deleted-dynamic/**{/,/*.js}' } }]
+		filters: [{ scheme: 'file', pattern: { glob: '**/deleted-dynamic/**{/,/*.js}' } }]
 	});
 	void connection.client.register(WillCreateFilesRequest.type, {
 		filters: [{ scheme: 'file', pattern: { glob: '**/created-dynamic/**{/,/*.js}' } }]
@@ -158,7 +160,7 @@ connection.onInitialized(() => {
 		]
 	});
 	void connection.client.register(WillDeleteFilesRequest.type, {
-		filters: [{scheme: 'file', pattern: { glob: '**/deleted-dynamic/**{/,/*.js}' } }]
+		filters: [{ scheme: 'file', pattern: { glob: '**/deleted-dynamic/**{/,/*.js}' } }]
 	});
 });
 
@@ -167,13 +169,13 @@ connection.onInitialized(() => {
 connection.onDeclaration((params) => {
 	assert.equal(params.position.line, 1);
 	assert.equal(params.position.character, 1);
-	return { uri: params.textDocument.uri, range: { start: { line: 1, character: 1}, end: {line: 1, character: 2 }}};
+	return { uri: params.textDocument.uri, range: { start: { line: 1, character: 1 }, end: { line: 1, character: 2 } } };
 });
 
 connection.onDefinition((params) => {
 	assert.equal(params.position.line, 1);
 	assert.equal(params.position.character, 1);
-	return { uri: params.textDocument.uri, range: { start: { line: 0, character: 0}, end: {line: 0, character: 1 }}};
+	return { uri: params.textDocument.uri, range: { start: { line: 0, character: 0 }, end: { line: 0, character: 1 } } };
 });
 
 connection.onHover((_params) => {
@@ -209,8 +211,8 @@ connection.onSignatureHelp((_params) => {
 
 connection.onReferences((params) => {
 	return [
-		Location.create(params.textDocument.uri, Range.create(0,0,0,0)),
-		Location.create(params.textDocument.uri, Range.create(1,1,1,1))
+		Location.create(params.textDocument.uri, Range.create(0, 0, 0, 0)),
+		Location.create(params.textDocument.uri, Range.create(1, 1, 1, 1))
 	];
 });
 
@@ -282,19 +284,19 @@ connection.onColorPresentation((_params) => {
 
 connection.onFoldingRanges((_params) => {
 	return [
-		FoldingRange.create(1,2)
+		FoldingRange.create(1, 2)
 	];
 });
 
 connection.onImplementation((params) => {
 	assert.equal(params.position.line, 1);
 	assert.equal(params.position.character, 1);
-	return { uri: params.textDocument.uri, range: { start: { line: 2, character: 2}, end: {line: 3, character: 3 }}};
+	return { uri: params.textDocument.uri, range: { start: { line: 2, character: 2 }, end: { line: 3, character: 3 } } };
 });
 
 connection.onSelectionRanges((_params) => {
 	return [
-		SelectionRange.create(Range.create(1,2,3,4))
+		SelectionRange.create(Range.create(1, 2, 3, 4))
 	];
 });
 
@@ -349,7 +351,7 @@ connection.workspace.onWillDeleteFiles((params) => {
 connection.onTypeDefinition((params) => {
 	assert.equal(params.position.line, 1);
 	assert.equal(params.position.character, 1);
-	return { uri: params.textDocument.uri, range: { start: { line: 2, character: 2}, end: {line: 3, character: 3 }}};
+	return { uri: params.textDocument.uri, range: { start: { line: 2, character: 2 }, end: { line: 3, character: 3 } } };
 });
 
 connection.languages.callHierarchy.onPrepare((params) => {
@@ -368,7 +370,7 @@ connection.languages.callHierarchy.onIncomingCalls((params) => {
 	return [
 		{
 			from: params.item,
-			fromRanges: [ Range.create(1, 1, 1, 1)]
+			fromRanges: [Range.create(1, 1, 1, 1)]
 		}
 	];
 });
@@ -377,7 +379,7 @@ connection.languages.callHierarchy.onOutgoingCalls((params) => {
 	return [
 		{
 			to: params.item,
-			fromRanges: [ Range.create(1, 1, 1, 1)]
+			fromRanges: [Range.create(1, 1, 1, 1)]
 		}
 	];
 });
@@ -405,7 +407,7 @@ connection.languages.semanticTokens.onDelta(() => {
 
 connection.languages.onLinkedEditingRange(() => {
 	return {
-		ranges: [ Range.create(1,1,1,1)],
+		ranges: [Range.create(1, 1, 1, 1)],
 		wordPattern: '\\w'
 	};
 });
@@ -421,7 +423,7 @@ connection.languages.diagnostics.on(() => {
 
 connection.languages.diagnostics.onWorkspace(() => {
 	return {
-		items: [ {
+		items: [{
 			kind: Proposed.DocumentDiagnosticReportKind.full,
 			uri: 'uri',
 			version: 1,
@@ -430,6 +432,31 @@ connection.languages.diagnostics.onWorkspace(() => {
 			]
 		}]
 	};
+});
+
+let typeHierarchySample = {
+	superTypes: [] as TypeHierarchyItem[],
+	subTypes: [] as TypeHierarchyItem[]
+}
+connection.languages.typeHierarchy.onPrepare((params) => {
+	const currentItem = {
+		kind: SymbolKind.Class,
+		name: 'ClazzB',
+		range: Range.create(1, 1, 1, 1),
+		selectionRange: Range.create(2, 2, 2, 2),
+		uri: params.textDocument.uri
+	} as TypeHierarchyItem;
+	typeHierarchySample.superTypes = [ {...currentItem, name: 'classA', uri: 'uri-for-A'}];
+	typeHierarchySample.subTypes = [ {...currentItem, name: 'classC', uri: 'uri-for-C'}]
+	return [currentItem];
+});
+
+connection.languages.typeHierarchy.onSupertypes((_params) => {
+	return typeHierarchySample.superTypes;
+});
+
+connection.languages.typeHierarchy.onSubtypes((_params) => {
+	return typeHierarchySample.subTypes;
 });
 
 connection.onRequest(
